@@ -1,4 +1,5 @@
-GET http://localhost:8090/
+### Gets a wallet
+GET http://localhost:8090/wallet
 Accept: application/json
 
 ###

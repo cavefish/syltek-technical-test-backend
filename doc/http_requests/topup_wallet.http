@@ -1,0 +1,9 @@
+POST http://localhost:8090/wallet/topup
+Content-Type: application/json
+
+{
+  "amount": 123,
+  "currency": "EUR"
+}
+
+###
