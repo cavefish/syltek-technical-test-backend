@@ -8,7 +8,10 @@
 
 ## 2
 
-- Implememt basic actions in controller (GET wallet, and POST topup on wallet).
+- Implement basic actions in controller (GET wallet, and POST topup on wallet).
   - TODO: implement auth interceptor to make sure user can do those actions,
   and identify user behind request.
 
+## 3
+
+- Create use cases and connect controller to use cases
