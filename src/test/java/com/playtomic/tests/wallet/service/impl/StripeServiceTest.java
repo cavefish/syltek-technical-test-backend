@@ -1,36 +1,68 @@
 package com.playtomic.tests.wallet.service.impl;
 
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.playtomic.tests.wallet.service.StripeAmountTooSmallException;
-import com.playtomic.tests.wallet.service.StripeServiceException;
 import com.playtomic.tests.wallet.service.StripeService;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-
+import com.playtomic.tests.wallet.service.StripeServiceException;
 import java.math.BigDecimal;
 import java.net.URI;
+import org.junit.jupiter.api.*;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpStatus;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-/**
- * This test is failing with the current implementation.
- *
- * How would you test this?
- */
+@Testcontainers
+@WireMockTest
+@Disabled // TODO check how-to make wiremock library use testcontaienrs image
 public class StripeServiceTest {
 
-    URI testUri = URI.create("http://how-would-you-test-me.localhost");
-    StripeService s = new StripeService(testUri, testUri, new RestTemplateBuilder());
+    @Container
+    private static final WireMockContainer wiremockServer = new WireMockContainer("wiremock/wiremock:2.35.0");
+
+
+    private StripeService subject;
+
+    @BeforeAll
+    static void beforeAll() {
+        wiremockServer.start();
+        WireMock.configureFor(wiremockServer.getPort());
+    }
+
+    @AfterAll
+    static void afterAll() {
+        wiremockServer.stop();
+    }
+
+    @BeforeEach
+    void setup() {
+        URI chargesTestUri = URI.create(wiremockServer.getBaseUrl()+"/charges");
+        URI refundTestUri = URI.create(wiremockServer.getBaseUrl()+"/refunds");
+        subject = new StripeService(chargesTestUri, refundTestUri, new RestTemplateBuilder());
+    }
 
     @Test
     public void test_exception() {
+        stubFor(post("/charges")
+                .willReturn(serverError().withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())));
+
         Assertions.assertThrows(StripeAmountTooSmallException.class, () -> {
-            s.charge("4242 4242 4242 4242", new BigDecimal(5));
+            subject.charge("4242 4242 4242 4242", new BigDecimal(5));
         });
     }
 
     @Test
     public void test_ok() throws StripeServiceException {
-        s.charge("4242 4242 4242 4242", new BigDecimal(15));
+        stubFor(post("/charges")
+                .willReturn(ok()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"id\": \"foo\"}")));
+
+        subject.charge("4242 4242 4242 4242", new BigDecimal(15));
     }
 }

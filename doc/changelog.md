@@ -15,3 +15,10 @@
 ## 3
 
 - Create use cases and connect controller to use cases
+
+## 4
+
+- Refactor stripe test to use Wiremock for server mocking, and testcontaienrs
+ for reducing local setup of wiremock.
+  - TODO: Fix issue with missing wiremock extension not working
+
