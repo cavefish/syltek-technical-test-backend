@@ -8,7 +8,5 @@ public interface WalletRepository {
 
     void addBalanceLine(String walletId, int amount, String concept);
 
-    Optional<String> findWalletIdForUserId(String userId);
-
     Optional<Wallet> getWallet(String walletId);
 }

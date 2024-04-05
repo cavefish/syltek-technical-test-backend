@@ -24,8 +24,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class WalletControllerTest {
-
-  public static final String USER_ID = "foo";
+  public static final String WALLET_ID = "wallet-id";
   @Mock private GetWalletUseCase getWalletUseCase;
   @Mock private TopupBalanceUseCase topupBalanceUseCase;
   @InjectMocks private WalletController subject;
@@ -33,10 +32,10 @@ public class WalletControllerTest {
   @Test
   void testGetWallet() {
     // Given
-    when(getWalletUseCase.process(any())).thenReturn(new GetWalletUseCaseResponse("wallet-id", 123, "EUR"));
-    WalletDto expectedResult = new WalletDto("wallet-id", 123, "EUR");
+    when(getWalletUseCase.process(any())).thenReturn(new GetWalletUseCaseResponse(WalletControllerTest.WALLET_ID, 123, "EUR"));
+    WalletDto expectedResult = new WalletDto(WalletControllerTest.WALLET_ID, 123, "EUR");
     // When
-    var result = subject.getWallet();
+    var result = subject.getWallet(WalletControllerTest.WALLET_ID);
     // Then
     verify(getWalletUseCase).process(any());
     assertThat(result).isNotNull().isEqualTo(expectedResult);
@@ -49,7 +48,7 @@ public class WalletControllerTest {
     when(topupBalanceUseCase.process(eq(createExpectedUseCaseRequest(request))))
         .thenReturn(TopupBalanceUseCaseResponse.unsuccessful("error msg"));
     // When
-    var result = subject.topupWallet(request);
+    var result = subject.topupWallet(WalletControllerTest.WALLET_ID, request);
     // Then
     verify(topupBalanceUseCase).process(any());
     assertThat(result)
@@ -66,7 +65,7 @@ public class WalletControllerTest {
     when(topupBalanceUseCase.process(eq(createExpectedUseCaseRequest(request))))
         .thenReturn(TopupBalanceUseCaseResponse.successful("payment-1"));
     // When
-    var result = subject.topupWallet(request);
+    var result = subject.topupWallet(WalletControllerTest.WALLET_ID, request);
     // Then
     verify(topupBalanceUseCase).process(any());
     assertThat(result)
@@ -83,6 +82,6 @@ public class WalletControllerTest {
 
   @NotNull
   private static TopupBalanceUseCaseRequest createExpectedUseCaseRequest(TopupRequest request) {
-    return new TopupBalanceUseCaseRequest(USER_ID, request.amount(), request.currency(), request.creditCardNumber(), request.idempotencyId());
+    return new TopupBalanceUseCaseRequest(WALLET_ID, request.amount(), request.currency(), request.creditCardNumber(), request.idempotencyId());
   }
 }

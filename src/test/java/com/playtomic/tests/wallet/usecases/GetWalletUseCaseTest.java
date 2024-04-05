@@ -19,28 +19,14 @@ import java.util.Optional;
 @ExtendWith(MockitoExtension.class)
 class GetWalletUseCaseTest {
 
-  public static final String USER_ID = "foo";
   public static final String WALLET_ID = "wallet-id";
   @Mock private WalletRepository repository;
   @InjectMocks private GetWalletUseCase subject;
 
   @Test
-  void testProcessWhenUserDontHaveWallet() {
-    // Given
-    var input = new GetWalletUseCaseRequest(USER_ID);
-    when(repository.findWalletIdForUserId(USER_ID)).thenReturn(Optional.empty());
-    // When
-    var result = subject.process(input);
-    // Then
-    assertThat(result).isNull();
-    verify(repository, never()).getWallet(any());
-  }
-
-  @Test
   void testProcessWhenWalletMissing() {
     // Given
-    var input = new GetWalletUseCaseRequest(USER_ID);
-    when(repository.findWalletIdForUserId(USER_ID)).thenReturn(Optional.of(WALLET_ID));
+    var input = new GetWalletUseCaseRequest(WALLET_ID);
     when(repository.getWallet(WALLET_ID)).thenReturn(Optional.empty());
     // When
     var result = subject.process(input);
@@ -51,10 +37,9 @@ class GetWalletUseCaseTest {
   @Test
   void testProcessHappyPath() {
     // Given
-    var input = new GetWalletUseCaseRequest(USER_ID);
-    when(repository.findWalletIdForUserId(USER_ID)).thenReturn(Optional.of(WALLET_ID));
+    var input = new GetWalletUseCaseRequest(WALLET_ID);
     Wallet wallet = Wallet.builder()
-            .walletId("wallet-id")
+            .walletId(WALLET_ID)
             .walletLine(new WalletLine(1_23, "EUR", "topup 1"))
             .walletLine(new WalletLine(1_000_000_00, "EUR", "topup 2"))
             .walletLine(new WalletLine(-1_000_000_00, "EUR", "REFUND 2"))
@@ -65,6 +50,6 @@ class GetWalletUseCaseTest {
     // Then
     assertThat(result)
         .usingRecursiveComparison()
-        .isEqualTo(new GetWalletUseCaseResponse("wallet-id", 1_23, "EUR"));
+        .isEqualTo(new GetWalletUseCaseResponse(WALLET_ID, 1_23, "EUR"));
   }
 }

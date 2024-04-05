@@ -33,18 +33,6 @@ class TopupBalanceUseCaseTest {
 
   @InjectMocks private TopupBalanceUseCase subject;
 
-  @Test
-  void testProcessWhenWalletMissing() {
-    // Given
-    var input = createInput(123);
-    when(walletRepository.findWalletIdForUserId(input.userId())).thenReturn(Optional.empty());
-    // When
-    var output = subject.process(input);
-    // Then
-    isUnsuccessful(output);
-    verify(topupRequestRepository, never()).atomicInsertIfMissing(any(), any());
-  }
-
   @ParameterizedTest
   @EnumSource(
       value = TopupRequest.State.class,
@@ -53,7 +41,6 @@ class TopupBalanceUseCaseTest {
   void testProcessWhenTopupRequestAlreadyCreated(TopupRequest.State state) {
     // Given
     var input = createInput(123);
-    when(walletRepository.findWalletIdForUserId(input.userId())).thenReturn(Optional.of(WALLET_ID));
     when(topupRequestRepository.atomicInsertIfMissing(WALLET_ID, input.idempotencyId()))
         .thenReturn(new TopupRequest(WALLET_ID, input.idempotencyId(), state));
     // When
@@ -68,7 +55,6 @@ class TopupBalanceUseCaseTest {
   void testProcessWhenHappyPath() {
     // Given
     var input = createInput(1_23);
-    when(walletRepository.findWalletIdForUserId(input.userId())).thenReturn(Optional.of(WALLET_ID));
     when(topupRequestRepository.atomicInsertIfMissing(WALLET_ID, input.idempotencyId()))
         .thenReturn(new TopupRequest(WALLET_ID, input.idempotencyId(), TopupRequest.State.NEW));
     when(stripeService.charge(input.creditCardNumber(), new BigDecimal("1.23")))
@@ -86,7 +72,6 @@ class TopupBalanceUseCaseTest {
   void testProcessWhenStripFails() {
     // Given
     var input = createInput(1_23);
-    when(walletRepository.findWalletIdForUserId(input.userId())).thenReturn(Optional.of(WALLET_ID));
     when(topupRequestRepository.atomicInsertIfMissing(WALLET_ID, input.idempotencyId()))
             .thenReturn(new TopupRequest(WALLET_ID, input.idempotencyId(), TopupRequest.State.NEW));
     when(stripeService.charge(input.creditCardNumber(), new BigDecimal("1.23")))
@@ -115,6 +100,6 @@ class TopupBalanceUseCaseTest {
 
   @NotNull
   private static TopupBalanceUseCaseRequest createInput(int amount) {
-    return new TopupBalanceUseCaseRequest("foo", amount, "EUR", "visa-cc", "idempotencyId");
+    return new TopupBalanceUseCaseRequest(WALLET_ID, amount, "EUR", "visa-cc", "idempotencyId");
   }
 }

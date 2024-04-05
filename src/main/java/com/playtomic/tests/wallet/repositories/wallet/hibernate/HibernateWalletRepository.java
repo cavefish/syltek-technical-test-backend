@@ -26,11 +26,6 @@ public class HibernateWalletRepository implements WalletRepository {
   }
 
   @Override
-  public Optional<String> findWalletIdForUserId(String userId) {
-    return walletJpaRepository.findWalletIdByUserId(userId);
-  }
-
-  @Override
   public Optional<Wallet> getWallet(String walletId) {
     return walletJpaRepository.findById(walletId).map(this::map);
   }

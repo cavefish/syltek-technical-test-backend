@@ -30,10 +30,7 @@ public class TopupBalanceUseCase {
     private TopupRequestRepository topupRequestRepository;
 
     public TopupBalanceUseCaseResponse process(TopupBalanceUseCaseRequest input) {
-        Optional<String> walletId = walletRepository.findWalletIdForUserId(input.userId());
-        if (walletId.isEmpty()) return TopupBalanceUseCaseResponse.unsuccessful("User doesn't have a wallet");
-
-        var topupRequest = topupRequestRepository.atomicInsertIfMissing(walletId.get(), input.idempotencyId());
+        var topupRequest = topupRequestRepository.atomicInsertIfMissing(input.walletId(), input.idempotencyId());
         if (topupRequest.state() != TopupRequest.State.NEW) {
             String reason = switch (topupRequest.state()) {
                 case PENDING -> "Request pending to be processed";
@@ -45,7 +42,7 @@ public class TopupBalanceUseCase {
         }
         log.info("Processing request %s".formatted(input.idempotencyId()));
 
-        TopupBalanceUseCaseResponse result = processRequestToStripe(input, walletId.get());
+        TopupBalanceUseCaseResponse result = processRequestToStripe(input, input.walletId());
 
         TopupRequest.State newState = result.successful()? TopupRequest.State.SUCCESS : TopupRequest.State.ERROR;
         topupRequestRepository.updateRequest(topupRequest.walletId(), topupRequest.idempotencyId(), newState);

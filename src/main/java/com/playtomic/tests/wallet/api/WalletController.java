@@ -19,33 +19,32 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class WalletController {
   private static final Logger log = LoggerFactory.getLogger(WalletController.class);
-  public static final String USER_ID = "foo";
 
   private final GetWalletUseCase getWalletUseCase;
   private final TopupBalanceUseCase topupBalanceUseCase;
 
-  @GetMapping
-  public WalletDto getWallet() {
+  @GetMapping("/{walletId}")
+  public WalletDto getWallet(@PathVariable String walletId) {
     // TODO add auth interceptor to capture user ID from JWT, and check permissions
     log.info("GET wallet");
-    var input = new GetWalletUseCaseRequest(USER_ID);
+    var input = new GetWalletUseCaseRequest(walletId);
     var output = getWalletUseCase.process(input);
     return new WalletDto(output.walletId(),output.balance(), output.currency());
   }
 
-  @PostMapping("/topup")
-  public ResponseEntity<TopupResponse> topupWallet(@RequestBody TopupRequest request) {
+  @PostMapping("/{walletId}/topup")
+  public ResponseEntity<TopupResponse> topupWallet(@PathVariable String walletId, @RequestBody TopupRequest request) {
     // TODO add auth interceptor to capture user ID from JWT, and check permissions
     log.info("POST wallet/topup: %s".formatted(request));
-    var output = topupBalanceUseCase.process(mapRequest(request));
+    var output = topupBalanceUseCase.process(mapRequest(walletId, request));
     if (output.successful()) {
       return ResponseEntity.ok(mapResponse(output));
     }
     return ResponseEntity.badRequest().body(mapResponse(output));
   }
 
-  private TopupBalanceUseCaseRequest mapRequest(TopupRequest request) {
-    return new TopupBalanceUseCaseRequest(USER_ID, request.amount(), request.currency(), request.creditCardNumber(), request.idempotencyId());
+  private TopupBalanceUseCaseRequest mapRequest(String walletId, TopupRequest request) {
+    return new TopupBalanceUseCaseRequest(walletId, request.amount(), request.currency(), request.creditCardNumber(), request.idempotencyId());
   }
 
   private TopupResponse mapResponse(TopupBalanceUseCaseResponse output) {

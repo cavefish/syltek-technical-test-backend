@@ -15,9 +15,7 @@ public class GetWalletUseCase {
     private final WalletRepository walletRepository;
 
     public GetWalletUseCaseResponse process(GetWalletUseCaseRequest input) {
-        Optional<String> walletIdForUserId = walletRepository.findWalletIdForUserId(input.userId());
-        if (walletIdForUserId.isEmpty()) return null;
-        var wallet = walletRepository.getWallet(walletIdForUserId.get());
+        var wallet = walletRepository.getWallet(input.walletId());
         if (wallet.isEmpty()) return null;
         int totalAmount = wallet.get().walletLines().stream().mapToInt(WalletLine::amount).sum();
         return new GetWalletUseCaseResponse(wallet.get().walletId(), totalAmount, "EUR");
