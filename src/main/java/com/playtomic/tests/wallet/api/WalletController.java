@@ -30,7 +30,7 @@ public class WalletController {
     log.info("GET wallet");
     var input = new GetWalletUseCaseRequest(USER_ID);
     var output = getWalletUseCase.process(input);
-    return new WalletDto(output.balance(), output.currency());
+    return new WalletDto(output.walletId(),output.balance(), output.currency());
   }
 
   @PostMapping("/topup")

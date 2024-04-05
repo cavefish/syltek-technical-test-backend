@@ -31,3 +31,7 @@
 
 - Implemented hibernate repositories
   - TODO: Add missing configuration (e.g. Flyway migration) to have the database created and ready for IT
+
+## 7
+
+- Implement get wallet use case

@@ -33,8 +33,8 @@ public class WalletControllerTest {
   @Test
   void testGetWallet() {
     // Given
-    when(getWalletUseCase.process(any())).thenReturn(new GetWalletUseCaseResponse(123, "EUR"));
-    WalletDto expectedResult = new WalletDto(123, "EUR");
+    when(getWalletUseCase.process(any())).thenReturn(new GetWalletUseCaseResponse("wallet-id", 123, "EUR"));
+    WalletDto expectedResult = new WalletDto("wallet-id", 123, "EUR");
     // When
     var result = subject.getWallet();
     // Then

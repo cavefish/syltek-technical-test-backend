@@ -1,3 +1,3 @@
 package com.playtomic.tests.wallet.usecases.dtos;
 
-public record GetWalletUseCaseResponse(int balance, String currency) {}
+public record GetWalletUseCaseResponse(String walletId, int balance, String currency) {}
