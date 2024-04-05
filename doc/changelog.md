@@ -18,7 +18,7 @@
 
 ## 4
 
-- Refactor stripe test to use Wiremock for server mocking, and testcontaienrs
+- Refactor stripe test to use Wiremock for server mocking, and testcontainers
  for reducing local setup of wiremock.
   - TODO: Fix issue with missing wiremock extension not working
 
@@ -26,3 +26,8 @@
 
 - Implemented topup wallet use case
   - TODO: Implement hibernate repositories with record locking mechanism to protect concurrency
+
+## 6
+
+- Implemented hibernate repositories
+  - TODO: Add missing configuration (e.g. Flyway migration) to have the database created and ready for IT
