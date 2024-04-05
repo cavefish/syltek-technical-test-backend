@@ -7,6 +7,7 @@ import com.playtomic.tests.wallet.usecases.TopupBalanceUseCase;
 import com.playtomic.tests.wallet.usecases.dtos.GetWalletUseCaseResponse;
 import com.playtomic.tests.wallet.usecases.dtos.TopupBalanceUseCaseRequest;
 import com.playtomic.tests.wallet.usecases.dtos.TopupBalanceUseCaseResponse;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class WalletControllerTest {
 
+  public static final String USER_ID = "foo";
   @Mock private GetWalletUseCase getWalletUseCase;
   @Mock private TopupBalanceUseCase topupBalanceUseCase;
   @InjectMocks private WalletController subject;
@@ -43,9 +45,9 @@ public class WalletControllerTest {
   @Test
   void testTopupWalletFails() {
     // Given
-    TopupRequest request = new TopupRequest(123, "EUR");
-    when(topupBalanceUseCase.process(eq(new TopupBalanceUseCaseRequest(123, "EUR"))))
-        .thenReturn(new TopupBalanceUseCaseResponse(false));
+    TopupRequest request = createInputRequest();
+    when(topupBalanceUseCase.process(eq(createExpectedUseCaseRequest(request))))
+        .thenReturn(TopupBalanceUseCaseResponse.unsuccessful("error msg"));
     // When
     var result = subject.topupWallet(request);
     // Then
@@ -60,9 +62,9 @@ public class WalletControllerTest {
   @Test
   void testTopupWalletSuccessful() {
     // Given
-    TopupRequest request = new TopupRequest(123, "EUR");
-    when(topupBalanceUseCase.process(eq(new TopupBalanceUseCaseRequest(123, "EUR"))))
-        .thenReturn(new TopupBalanceUseCaseResponse(true));
+    TopupRequest request = createInputRequest();
+    when(topupBalanceUseCase.process(eq(createExpectedUseCaseRequest(request))))
+        .thenReturn(TopupBalanceUseCaseResponse.successful("payment-1"));
     // When
     var result = subject.topupWallet(request);
     // Then
@@ -72,5 +74,15 @@ public class WalletControllerTest {
         .extracting(ResponseEntity::getStatusCode)
         .as("Status Code")
         .matches(HttpStatusCode::is2xxSuccessful);
+  }
+
+  @NotNull
+  private static TopupRequest createInputRequest() {
+    return new TopupRequest(123, "EUR", "visa-cc", "idempotencyId");
+  }
+
+  @NotNull
+  private static TopupBalanceUseCaseRequest createExpectedUseCaseRequest(TopupRequest request) {
+    return new TopupBalanceUseCaseRequest(USER_ID, request.amount(), request.currency(), request.creditCardNumber(), request.idempotencyId());
   }
 }

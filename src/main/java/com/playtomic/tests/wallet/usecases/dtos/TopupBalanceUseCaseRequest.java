@@ -1,3 +1,3 @@
 package com.playtomic.tests.wallet.usecases.dtos;
 
-public record TopupBalanceUseCaseRequest(int amount, String currency) {}
+public record TopupBalanceUseCaseRequest(String userId, int amount, String currency, String creditCardNumber, String idempotencyId) {}

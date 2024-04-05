@@ -22,3 +22,7 @@
  for reducing local setup of wiremock.
   - TODO: Fix issue with missing wiremock extension not working
 
+## 5
+
+- Implemented topup wallet use case
+  - TODO: Implement hibernate repositories with record locking mechanism to protect concurrency

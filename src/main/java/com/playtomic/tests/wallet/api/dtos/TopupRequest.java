@@ -1,3 +1,3 @@
 package com.playtomic.tests.wallet.api.dtos;
 
-public record TopupRequest(int amount, String currency) {}
+public record TopupRequest(int amount, String currency, String creditCardNumber, String idempotencyId) {}
